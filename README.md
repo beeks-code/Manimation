@@ -22,12 +22,14 @@ The goal is to visually explain:
 ```bash
 git clone https://github.com/beeks-code/Manimation.git
 cd Manimation\Attention Mechanism
-<hr>
+
 Medium Quality
 manim -pqm file_name.py SceneName
-🔹 High Quality (Full HD)
+
+High Quality (Full HD)
 manim -pqh file_name.py SceneName
-🔹 4K Quality (Ultra HD)
+
+4K Quality (Ultra HD)
 manim -pqk file_name.py SceneName
 
 
