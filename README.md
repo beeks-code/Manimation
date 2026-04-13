@@ -18,10 +18,17 @@ The goal is to visually explain:
 - Manim Community Edition 
 #  Installation
  - pip install manim
-### Clone the repository
+## To Run
 ```bash
 git clone https://github.com/beeks-code/Manimation.git
 cd Manimation\Attention Mechanism
+<hr>
+Medium Quality
+manim -pqm file_name.py SceneName
+🔹 High Quality (Full HD)
+manim -pqh file_name.py SceneName
+🔹 4K Quality (Ultra HD)
+manim -pqk file_name.py SceneName
 
 
 
