@@ -183,7 +183,7 @@ class AttentionFull(Scene):
         self.k_mat = k_mat
         self.k_lbl = k_lbl
 
-    # S2 — Transpose K
+    # MAtix transpose animation
     def s2_transpose_k(self):
         title = sec_title(self, "Transpose K  →  Kᵀ", color=C_K)
 
