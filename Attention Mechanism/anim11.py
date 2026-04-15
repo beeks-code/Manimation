@@ -1,17 +1,11 @@
-"""
-Educational Animation: Understanding Q, K, V in Self-Attention
-Same color theme as attention_full.py
-"""
-
 from manim import *
 import numpy as np
 
-# ─── PALETTE ────────────────────────────────────────────────────────────────
 BG     = "#0f172a"
-C_Q    = "#3b82f6"   # blue  — Query
-C_K    = "#22c55e"   # green — Key
-C_V    = "#f97316"   # orange— Value
-C_GLOW = "#a78bfa"   # purple glow
+C_Q    = "#3b82f6"   
+C_K    = "#22c55e"  
+C_V    = "#f97316"   
+C_GLOW = "#a78bfa"   
 C_TEXT = "#e2e8f0"
 C_DIM  = "#475569"
 C_ACCT = "#f472b6"
@@ -24,7 +18,6 @@ config.frame_rate   = 60
 
 WORDS = ["I", "Like", "Math"]
 
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 def safe_vg(*mobs):
     return VGroup(*[m for m in mobs if m is not None])
@@ -56,7 +49,6 @@ def token_box(word, color):
                             color=color, fill_color=BG,
                             fill_opacity=1.0, stroke_width=2.0)
     rect.move_to(txt)
-    # glow layers
     g = VGroup()
     for i in (3, 2, 1):
         r = rect.copy()
@@ -111,7 +103,6 @@ def glow_pulse(scene, mob, color=C_GLOW, n=1):
                                run_time=0.40).scale(1.05))
 
 
-# ─── SCENE ───────────────────────────────────────────────────────────────────
 
 class QKVExplain(Scene):
 
@@ -128,9 +119,6 @@ class QKVExplain(Scene):
         self.s9_output()
         self.s10_summary()
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S1 — Title
-    # ═══════════════════════════════════════════════════════════════════════
     def s1_title(self):
         main = Text("Understanding Q, K, V",
                     font="Fira Code Bold", color=C_TEXT,
@@ -140,7 +128,6 @@ class QKVExplain(Scene):
         sub.next_to(main, DOWN, buff=0.28)
         group = VGroup(main, sub).move_to(ORIGIN)
 
-        # glow behind title
         glow = VGroup()
         for i in (3, 2, 1):
             g = main.copy().set_color(C_GLOW)
@@ -159,9 +146,6 @@ class QKVExplain(Scene):
         self.play(FadeOut(safe_vg(glow, main, sub), run_time=0.6))
         self.wait(0.15)
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S2 — Input Tokens
-    # ═══════════════════════════════════════════════════════════════════════
     def s2_tokens(self):
         title = sec_title(self, "Input Tokens")
 
@@ -184,13 +168,9 @@ class QKVExplain(Scene):
 
         self.tokens = tokens
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S3 — Embeddings
-    # ═══════════════════════════════════════════════════════════════════════
     def s3_embeddings(self):
         title = sec_title(self, "Token Embeddings")
 
-        # move tokens up
         self.play(self.tokens.animate(rate_func=smooth, run_time=0.55)
                              .move_to(UP * 2.4))
 
@@ -225,13 +205,9 @@ class QKVExplain(Scene):
 
         self.vecs = vecs
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S4 — Linear Projections → Q, K, V
-    # ═══════════════════════════════════════════════════════════════════════
     def s4_projections(self):
         title = sec_title(self, "Linear Projection  →  Q, K, V")
 
-        # Q K V columns, 3 tokens each
         col_positions = [LEFT * 4.5, ORIGIN, RIGHT * 4.5]
         col_colors    = [C_Q, C_K, C_V]
         col_names     = ["Q  (Query)", "K  (Key)", "V  (Value)"]
@@ -258,7 +234,6 @@ class QKVExplain(Scene):
                 v.move_to([cx[0], row_y[ti], 0])
                 all_qkv[ci].add(v)
 
-                # arrow from embedding → qkv vec
                 src = self.vecs[ti].get_center()
                 dst = v[0][0].get_top() + UP * 0.06
                 arr = CurvedArrow(src, dst, angle=-0.3 + ci * 0.3,
@@ -267,7 +242,6 @@ class QKVExplain(Scene):
                 arr.set_stroke(opacity=0.55)
                 branch_arrows.add(arr)
 
-        # fade embeddings and tokens, reveal projections
         self.play(
             FadeOut(safe_vg(self.tokens, self.vecs), run_time=0.5),
         )
@@ -292,13 +266,9 @@ class QKVExplain(Scene):
         self.v_vecs   = v_vecs
         self.col_lbls = col_lbls
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S5 — Explain Query
-    # ═══════════════════════════════════════════════════════════════════════
     def s5_query(self):
         title = sec_title(self, "Query (Q)", color=C_Q)
 
-        # dim K and V
         self.play(
             self.k_vecs.animate(run_time=0.4).set_opacity(0.18),
             self.v_vecs.animate(run_time=0.4).set_opacity(0.18),
@@ -306,13 +276,11 @@ class QKVExplain(Scene):
             self.col_lbls[2].animate(run_time=0.4).set_opacity(0.18),
         )
 
-        # glow Q column
         qb = SurroundingRectangle(self.q_vecs, color=C_Q,
                                    buff=0.12, stroke_width=2.5)
         self.play(Create(qb, run_time=0.35))
         glow_pulse(self, qb, color=C_Q, n=2)
 
-        # info block — right side
         info = info_block(
             "Query (Q)",
             ["Represents what a token is seeking",
@@ -323,7 +291,6 @@ class QKVExplain(Scene):
         info.move_to(RIGHT * 3.2 + DOWN * 0.2)
         self.play(FadeIn(info, shift=LEFT * 0.15, run_time=0.55))
 
-        # arrows from Q[0] → all K positions (but show on Q side)
         q0_center = self.q_vecs[0].get_center()
         attn_arrows = VGroup()
         for qv in self.q_vecs:
@@ -346,9 +313,6 @@ class QKVExplain(Scene):
             self.col_lbls[2].animate(run_time=0.35).set_opacity(1.0),
         )
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S6 — Explain Key
-    # ═══════════════════════════════════════════════════════════════════════
     def s6_key(self):
         title = sec_title(self, "Key (K)", color=C_K)
 
@@ -374,13 +338,11 @@ class QKVExplain(Scene):
         info.move_to(RIGHT * 3.2 + DOWN * 0.2)
         self.play(FadeIn(info, shift=LEFT * 0.15, run_time=0.55))
 
-        # dot product Q · K visualization
         dot_formula = MathTex(r"Q \cdot K = \text{attention score}",
                               color=C_GLOW, font_size=30)
         dot_formula.next_to(info, DOWN, buff=0.35)
         self.play(Write(dot_formula, run_time=0.7))
 
-        # interaction arc Q[0] → each K — collected so they can be removed
         q0 = self.q_vecs[0].get_center()
         arcs = VGroup()
         for kv in self.k_vecs:
@@ -393,7 +355,6 @@ class QKVExplain(Scene):
 
         self.wait(1.0)
         self.play(FadeOut(safe_vg(title, kb, info, dot_formula, arcs), run_time=0.4))
-        # clear arcs by rebuilding screen
         self.play(
             self.q_vecs.animate(run_time=0.35).set_opacity(1.0),
             self.v_vecs.animate(run_time=0.35).set_opacity(1.0),
@@ -401,9 +362,6 @@ class QKVExplain(Scene):
             self.col_lbls[2].animate(run_time=0.35).set_opacity(1.0),
         )
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S7 — Attention Scores (QKᵀ heatmap)
-    # ═══════════════════════════════════════════════════════════════════════
     def s7_scores(self):
         title = sec_title(self, "Attention Scores  QKᵀ", color=C_GLOW)
 
@@ -413,7 +371,6 @@ class QKVExplain(Scene):
                             self.v_vecs, self.col_lbls), run_time=0.5)
         )
 
-        # 3×3 score matrix as heatmap
         fake_scores = np.array([
             [0.85, 0.10, 0.05],
             [0.20, 0.70, 0.10],
