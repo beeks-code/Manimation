@@ -560,7 +560,7 @@ class QKVExplain(Scene):
         title = sec_title(self, "Summary", color=C_TEXT)
 
         rows = [
-            ("Query  (Q)", "→", "What to look for",   C_Q),
+            ("Query  (Q)", "→", "What to look for ",   C_Q),
             ("Key    (K)", "→", "What is available",  C_K),
             ("Value  (V)", "→", "What is taken",      C_V),
         ]
