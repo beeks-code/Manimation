@@ -365,7 +365,6 @@ class QKVExplain(Scene):
     def s7_scores(self):
         title = sec_title(self, "Attention Scores  QKᵀ", color=C_GLOW)
 
-        # fade projections
         self.play(
             FadeOut(safe_vg(self.q_vecs, self.k_vecs,
                             self.v_vecs, self.col_lbls), run_time=0.5)
@@ -402,7 +401,6 @@ class QKVExplain(Scene):
         heat_group = VGroup(heat_cells, score_lbls)
         heat_group.move_to(LEFT * 1.5 + DOWN * 0.2)
 
-        # row / col labels — tracked so they can be faded out
         axis_lbls = VGroup()
         for i, w in enumerate(row_lbl_names):
             rl = Text(w, font="Fira Code", color=TOKEN_COLORS[i], font_size=22)
@@ -436,7 +434,6 @@ class QKVExplain(Scene):
         self.play(FadeOut(safe_vg(title, heat_group, axis_lbls,
                                    formula, note1, note2), run_time=0.5))
 
-        # bring projections back for s8
         self.play(
             FadeIn(self.q_vecs,   run_time=0.4),
             FadeIn(self.k_vecs,   run_time=0.4),
@@ -444,9 +441,6 @@ class QKVExplain(Scene):
             FadeIn(self.col_lbls, run_time=0.4),
         )
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S8 — Explain Value
-    # ═══════════════════════════════════════════════════════════════════════
     def s8_value(self):
         title = sec_title(self, "Value (V)", color=C_V)
 
@@ -472,7 +466,6 @@ class QKVExplain(Scene):
         info.move_to(LEFT * 3.5 + DOWN * 0.2)
         self.play(FadeIn(info, shift=RIGHT * 0.15, run_time=0.55))
 
-        # weighted sum — lines with varying thickness
         weights = [0.75, 0.15, 0.10]
         output_pt = RIGHT * 5.5 + DOWN * 0.0
         wsum_arrows = VGroup()
@@ -513,9 +506,6 @@ class QKVExplain(Scene):
             self.col_lbls[1].animate(run_time=0.35).set_opacity(1.0),
         )
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S9 — Final Output (contextual embeddings)
-    # ═══════════════════════════════════════════════════════════════════════
     def s9_output(self):
         title = sec_title(self, "Contextual Representation", color=C_GLOW)
 
@@ -531,7 +521,6 @@ class QKVExplain(Scene):
             x = -3.0 + i * 3.0
             v.move_to([x, -0.2, 0])
 
-            # glow border
             gb = SurroundingRectangle(v[0], color=color,
                                        buff=0.07, stroke_width=2.0)
 
@@ -567,9 +556,6 @@ class QKVExplain(Scene):
         self.play(FadeOut(safe_vg(title, out_vecs, out_lbls,
                                    ctx_note, ctx_note2), run_time=0.5))
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S10 — Summary
-    # ═══════════════════════════════════════════════════════════════════════
     def s10_summary(self):
         title = sec_title(self, "Summary", color=C_TEXT)
 
@@ -595,7 +581,6 @@ class QKVExplain(Scene):
             self.play(FadeIn(rg, shift=RIGHT * 0.15, run_time=0.50))
             self.wait(0.25)
 
-        # glow pulse each row
         for rg, (_, _, _, col) in zip(row_groups, rows):
             box = SurroundingRectangle(rg, color=col, buff=0.14,
                                         stroke_width=1.8, corner_radius=0.10)
@@ -604,7 +589,6 @@ class QKVExplain(Scene):
 
         self.wait(1.5)
 
-        # final formula
         formula = MathTex(
             r"\text{Attention}(Q,K,V)="
             r"\text{softmax}\!\left(\frac{QK^T}{\sqrt{d_k}}\right)V",
