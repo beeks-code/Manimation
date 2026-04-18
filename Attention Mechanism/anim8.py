@@ -1,5 +1,9 @@
 
-
+"""
+This is alt for anim9
+Mostly written by claude, fixed word positings and matrix placements,
+Anim9 has some issues 
+"""
 
 from manim import *
 import numpy as np
