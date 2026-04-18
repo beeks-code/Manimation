@@ -4,7 +4,6 @@
 from manim import *
 import numpy as np
 
-# ─── PALETTE ────────────────────────────────────────────────────────────────
 BG      = "#0f172a"
 C_Q     = "#3b82f6"   # blue  — Query
 C_K     = "#22c55e"   # green — Key
@@ -19,11 +18,10 @@ config.pixel_height = 1080
 config.pixel_width  = 1920
 config.frame_rate   = 60
 
-# ─── MATRIX DIMENSIONS ───────────────────────────────────────────────────────
-N   = 3   # tokens: "I", "love", "math"
-DIM = 3   # visual d_model columns (kept small for clarity)
+# MATRIX DIMENSIONS 
+N   = 3  
+DIM = 3   
 
-# ─── FIXED DATA ──────────────────────────────────────────────────────────────
 np.random.seed(42)
 Q_DATA = np.round(np.random.uniform(0.3, 1.2, (N, DIM)), 2)
 K_DATA = np.round(np.random.uniform(0.3, 1.2, (N, DIM)), 2)
@@ -40,9 +38,8 @@ def softmax_row(x):
 A_DATA = np.array([softmax_row(r) for r in S_SCALE])
 O_DATA = A_DATA @ V_DATA
 
-CELL = 0.60   # cell side length — matches reference image look
+CELL = 0.60   
 
-# ─── HELPERS ─────────────────────────────────────────────────────────────────
 
 def safe_vg(*mobs):
     return VGroup(*[m for m in mobs if m is not None])
@@ -92,7 +89,6 @@ def build_matrix(rows, cols, stroke_color, fill_color=None,
             ])
             cells.add(sq)
 
-    # bracket style matching reference image
     bl = MathTex(r"\big[", color=stroke_color, font_size=int(cell * 130))
     br = MathTex(r"\big]", color=stroke_color, font_size=int(cell * 130))
     bl.next_to(cells, LEFT,  buff=0.04)
@@ -139,7 +135,6 @@ def sec_title(scene, txt, color=C_TEXT, fs=36):
     return t
 
 
-# ─── SCENE ───────────────────────────────────────────────────────────────────
 
 class AttentionFull(Scene):
 
@@ -152,13 +147,9 @@ class AttentionFull(Scene):
         self.s5_multiply_v()
         self.s6_final_output()
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S1 — Q and K side by side (matching reference image style)
-    # ═══════════════════════════════════════════════════════════════════════
     def s1_qk_intro(self):
         title = sec_title(self, "Query (Q) and Key (K) Matrices")
 
-        # ── Q Matrix ────────────────────────────────────────────────────
         q_mat = build_matrix(N, DIM, C_Q)
         q_mat.move_to(LEFT * 4.0 + DOWN * 0.2)
 
@@ -171,7 +162,6 @@ class AttentionFull(Scene):
         )
         q_dim.next_to(q_mat, DOWN, buff=0.18)
 
-        # ── K Matrix ────────────────────────────────────────────────────
         k_mat = build_matrix(N, DIM, C_K)
         k_mat.move_to(RIGHT * 4.0 + DOWN * 0.2)
 
@@ -184,7 +174,6 @@ class AttentionFull(Scene):
         )
         k_dim.next_to(k_mat, DOWN, buff=0.18)
 
-        # ── Animate in ──────────────────────────────────────────────────
         self.play(
             FadeIn(q_mat, scale=0.88, run_time=0.7, rate_func=smooth),
             FadeIn(q_lbl, shift=DOWN * 0.1, run_time=0.5),
@@ -216,31 +205,26 @@ class AttentionFull(Scene):
         self.k_mat = k_mat
         self.k_lbl = k_lbl
 
-    # ═══════════════════════════════════════════════════════════════════════
     # S2 — Transpose K
     def s2_transpose_k(self):
         title = sec_title(self, "Transpose K  →  Kᵀ", color=C_K)
 
-        # dim Q while we work on K
         self.play(
             self.q_mat.animate(run_time=0.35).set_opacity(0.18),
             self.q_lbl.animate(run_time=0.35).set_opacity(0.18),
         )
-
-        # ── highlight all 3 rows of K one by one (row → becomes col) ──────
         for r in range(N):
             hl = hl_row(self.k_mat, r, DIM, C_K)
             self.play(Create(hl, run_time=0.22))
             self.play(FadeOut(hl, run_time=0.18))
 
-        # ── build Kᵀ at the same position as K, then slide it right ───────
         kt_mat = build_matrix(DIM, N, C_K)   # shape flipped: DIM rows × N cols
-        kt_mat.move_to(self.k_mat.get_center())   # start at K's position
+        kt_mat.move_to(self.k_mat.get_center())   
 
         kt_lbl = matrix_label(r"K^T", C_K, size=38)
         kt_lbl.next_to(kt_mat, UP, buff=0.22)
 
-        # Rotate K copy 90° in place → lands as Kᵀ shape
+  
         k_copy = self.k_mat.copy()
         self.play(
             Rotate(k_copy, angle=PI / 2, run_time=0.55, rate_func=smooth),
@@ -252,7 +236,6 @@ class AttentionFull(Scene):
             FadeIn(kt_lbl, run_time=0.35),
         )
 
-        # slide Kᵀ to its final position (right side)
         self.play(
             kt_mat.animate(rate_func=smooth, run_time=0.55)
                 .move_to(RIGHT * 4.0 + DOWN * 0.2),
@@ -263,7 +246,6 @@ class AttentionFull(Scene):
         self.wait(0.4)
         self.play(FadeOut(title, run_time=0.35))
 
-        # restore Q
         self.play(
             self.q_mat.animate(run_time=0.35).set_opacity(1.0),
             self.q_lbl.animate(run_time=0.35).set_opacity(1.0),
@@ -272,13 +254,10 @@ class AttentionFull(Scene):
         self.kt_mat = kt_mat
         self.kt_lbl = kt_lbl
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S3 — Q × Kᵀ cell-by-cell
-    # ═══════════════════════════════════════════════════════════════════════
+
     def s3_multiply_qkt(self):
         title = sec_title(self, "Q × Kᵀ  —  Dot Product per Cell", color=C_GLOW)
 
-        # rearrange: Q left, Kᵀ right, result center
         self.play(
             self.q_mat.animate(rate_func=smooth, run_time=0.65)
                       .move_to(LEFT * 5.5 + DOWN * 0.2),
@@ -292,7 +271,6 @@ class AttentionFull(Scene):
                                 UP * (DIM * CELL / 2 + 0.3), ORIGIN),
         )
 
-        # result matrix shell (N × N)
         r_mat = build_matrix(N, N, C_GLOW)
         r_mat.move_to(RIGHT * 4.8 + DOWN * 0.2)
         r_lbl = matrix_label(r"QK^T\ \ (3\times 3)", C_GLOW, size=28)
@@ -303,13 +281,11 @@ class AttentionFull(Scene):
 
         for i in range(N):
             for j in range(N):
-                # highlight row i of Q, col j of Kᵀ
                 hl_r = hl_row(self.q_mat, i, DIM, C_Q)
                 hl_c = hl_col(self.kt_mat, j, DIM, N, C_K)
                 self.play(Create(hl_r, run_time=0.20),
                           Create(hl_c, run_time=0.20))
 
-                # dot product formula
                 terms = " + ".join(
                     [f"{Q_DATA[i,k]:.1f}·{K_DATA[j,k]:.1f}"
                      for k in range(DIM)]
@@ -320,7 +296,6 @@ class AttentionFull(Scene):
                 dp_txt.next_to(r_mat, DOWN, buff=0.32)
                 self.play(FadeIn(dp_txt, run_time=0.22))
 
-                # place value in result cell
                 target = r_mat[0][i * N + j]
                 vtxt = cell_txt(val, C_GLOW, size=17)
                 vtxt.move_to(target)
@@ -342,14 +317,11 @@ class AttentionFull(Scene):
         self.r_lbl  = r_lbl
         self.val_mobs = val_mobs
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S4 — Scale + Softmax
-    # ═══════════════════════════════════════════════════════════════════════
+
     def s4_scale_softmax(self):
         title = sec_title(self,
                           f"Scale ÷ √{DIM}  then  Softmax", color=C_ACCT)
 
-        # scale formula
         scale_f = MathTex(
             r"S' = \frac{QK^T}{\sqrt{d_{\text{model}}}}",
             color=C_TEXT, font_size=32
@@ -358,7 +330,6 @@ class AttentionFull(Scene):
         self.play(Write(scale_f, run_time=0.7))
         self.wait(0.3)
 
-        # update each cell to scaled value (numbers shrink, color shifts)
         scale_val_mobs = {}
         for i in range(N):
             for j in range(N):
@@ -377,7 +348,6 @@ class AttentionFull(Scene):
 
         self.wait(0.3)
 
-        # softmax formula
         sm_f = MathTex(
             r"A = \text{softmax}\!\left(\frac{QK^T}{\sqrt{d_{\text{model}}}}\right)",
             color=C_TEXT, font_size=30
@@ -386,7 +356,6 @@ class AttentionFull(Scene):
         self.play(Write(sm_f, run_time=0.7))
         self.wait(0.3)
 
-        # softmax row by row
         attn_val_mobs = {}
         for i in range(N):
             hl = hl_row(self.r_mat, i, N, C_Q)
@@ -408,7 +377,6 @@ class AttentionFull(Scene):
                 )
             self.play(FadeOut(hl, run_time=0.18))
 
-        # relabel as A
         new_lbl = matrix_label(r"A\ \text{(Attention Weights)}", C_Q, size=26)
         new_lbl.next_to(self.r_mat, UP, buff=0.22)
         self.play(
@@ -427,14 +395,10 @@ class AttentionFull(Scene):
         self.attn_val_mobs = attn_val_mobs
         self.a_mat = self.r_mat
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S5 — Multiply with V
-    # ═══════════════════════════════════════════════════════════════════════
     def s5_multiply_v(self):
         title = sec_title(self, "Attention Weights  ×  V  →  Output",
                           color=C_V)
 
-        # fade / move Q and KT away, bring in V
         self.play(
             self.q_mat.animate(run_time=0.4).set_opacity(0),
             self.q_lbl.animate(run_time=0.4).set_opacity(0),
@@ -455,7 +419,6 @@ class AttentionFull(Scene):
         self.play(FadeIn(v_mat, scale=0.88, run_time=0.6, rate_func=smooth),
                   FadeIn(v_lbl, run_time=0.45))
 
-        # output matrix shell
         o_mat = build_matrix(N, DIM, C_V)
         o_mat.move_to(RIGHT * 4.6 + DOWN * 0.2)
         o_lbl = matrix_label(r"O\ \ (3 \times d_{\text{model}})", C_V, size=28)
@@ -480,7 +443,6 @@ class AttentionFull(Scene):
                 self.play(Create(hv, run_time=0.18),
                           FadeIn(wt_lbl, run_time=0.18))
 
-                # elastic stretch of V row by weight
                 vcells = VGroup(*[v_mat[0][j * DIM + c] for c in range(DIM)])
                 self.play(vcells.animate(rate_func=there_and_back,
                                          run_time=0.22)
@@ -516,14 +478,10 @@ class AttentionFull(Scene):
         self.o_mat = o_mat
         self.o_lbl = o_lbl
 
-    # ═══════════════════════════════════════════════════════════════════════
-    # S6 — Final Output: Contextual Embeddings
-    # ═══════════════════════════════════════════════════════════════════════
     def s6_final_output(self):
         title = sec_title(self, "Output: Contextual Embedding Matrix",
                           color=C_GLOW)
 
-        # fade attention and V, keep output
         self.play(
             FadeOut(safe_vg(self.a_mat, self.r_lbl,
                             self.v_mat, self.v_lbl), run_time=0.55),
@@ -533,7 +491,6 @@ class AttentionFull(Scene):
                       .move_to(UP * (N * CELL / 2 + 0.52)),
         )
 
-        # update output label
         ctx_lbl = matrix_label(
             r"\text{Contextual Embedding Matrix}\ (3 \times d_{\text{model}})",
             C_GLOW, size=30
@@ -541,13 +498,11 @@ class AttentionFull(Scene):
         ctx_lbl.next_to(self.o_mat, UP, buff=0.28)
         self.play(Transform(self.o_lbl, ctx_lbl, run_time=0.5))
 
-        # glow border on whole matrix
         gb = SurroundingRectangle(self.o_mat[0], color=C_GLOW,
                                    buff=0.10, stroke_width=3.0)
         self.play(Create(gb, run_time=0.45))
         glow_pulse(self, gb, n=2)
 
-        # row-by-row labels: e_(I), e_(love), e_(math)
         tokens = ["I", "love", "math"]
         row_labels_tex = [
             r"e_{(\text{I})}",
@@ -583,7 +538,6 @@ class AttentionFull(Scene):
             row_arrows.add(arr)
             row_lbls.add(lbl)
 
-        # final narration note
         note = Text(
             '"Each row is now a context-aware embedding\n'
             ' capturing meaning from the full sentence."',
@@ -594,7 +548,6 @@ class AttentionFull(Scene):
         self.play(FadeIn(note, run_time=0.6))
         self.wait(2.0)
 
-        # fade to black
         black = Rectangle(
             width=config.frame_width, height=config.frame_height,
             fill_color=BLACK, fill_opacity=1, stroke_opacity=0
