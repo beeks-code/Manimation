@@ -462,7 +462,7 @@ class AttentionFull(Scene):
         glow_pulse(self, gb, n=2)
 
         # row labels
-        row_labels_tex = [r"E_{(\text{I})}", r"E_{(\text{love}})", r"E_{(\text{math})}"]
+        row_labels_tex = [r"E_{(\text{I})}", r"E_{(\text{like}})", r"E_{(\text{math})}"]
         token_colors   = [C_Q, C_GLOW, C_ACCT]
 
         row_rects  = VGroup()
