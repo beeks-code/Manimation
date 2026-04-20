@@ -1,13 +1,8 @@
-"""
-Cinematic Manim Animation:
-Scaled Dot-Product Attention — Full Step-by-Step
-Q, K, V → QKᵀ → Scale → Softmax → A·V → Output
-"""
+
 
 from manim import *
 import numpy as np
 
-# ─── PALETTE ────────────────────────────────────────────────────────────────
 BG       = "#0f172a"
 C_QUERY  = "#3b82f6"
 C_KEY    = "#22c55e"
@@ -22,11 +17,9 @@ config.pixel_height = 1080
 config.pixel_width  = 1920
 config.frame_rate   = 60
 
-# ─── FIXED DATA (small, visual) ──────────────────────────────────────────────
 N   = 3    # tokens
 DIM = 3    # visual dimension (d_k)
 
-# Fixed Q, K, V values for animation
 Q_DATA = np.array([[1.0, 0.5, 0.2],
                    [0.3, 1.2, 0.8],
                    [0.9, 0.1, 1.1]])
@@ -49,9 +42,8 @@ def softmax_row(x):
 A_DATA = np.array([softmax_row(row) for row in S_SCALE])
 O_DATA = A_DATA @ V_DATA
 
-CELL = 0.62   # matrix cell size
+CELL = 0.62   
 
-# ─── HELPERS ────────────────────────────────────────────────────────────────
 
 def safe_vgroup(*mobs):
     return VGroup(*[m for m in mobs if m is not None])
@@ -76,13 +68,7 @@ def make_grid_bg(opacity=0.04):
 
 def make_mat_mob(data, color, cell=CELL, label="",
                  fill_op=0.12, show_values=False):
-    """
-    Build a VGroup matrix from a 2D numpy array.
-    group[0] = cells VGroup   (indexed [r*cols + c])
-    group[1] = bracket_l
-    group[2] = bracket_r
-    group[3] = label (if any)
-    """
+
     rows, cols = data.shape
     cells = VGroup()
     for r in range(rows):
@@ -152,7 +138,6 @@ def glow_pulse(scene, mob, n=1, color=C_GLOW):
                                run_time=0.36).scale(1.05))
 
 
-# ─── MAIN SCENE ─────────────────────────────────────────────────────────────
 
 class DotProductAttention(Scene):
 
@@ -167,9 +152,6 @@ class DotProductAttention(Scene):
         self.scene7_multiply_v()
         self.scene8_final()
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 1 — Q, K, V Setup
-    # ════════════════════════════════════════════════════════════════════════
     def scene1_setup(self):
         title = section_label(self, "Self-Attention: Q, K, V Matrices")
 
@@ -200,19 +182,14 @@ class DotProductAttention(Scene):
         self.k_mat = k_mat
         self.v_mat = v_mat
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 2 — Transpose K
-    # ════════════════════════════════════════════════════════════════════════
     def scene2_transpose_k(self):
         title = section_label(self, "Step 1: Transpose K  →  Kᵀ", color=C_KEY)
 
-        # fade Q and V to dim
         self.play(
             self.q_mat.animate(run_time=0.4).set_opacity(0.22),
             self.v_mat.animate(run_time=0.4).set_opacity(0.22),
         )
 
-        # duplicate K to the right for transpose demo
         k_copy = self.k_mat.copy()
         kt_target = make_mat_mob(K_DATA.T, C_KEY, label=r"K^T")
         kt_target.move_to(RIGHT * 2.8 + DOWN * 0.3)
@@ -225,7 +202,6 @@ class DotProductAttention(Scene):
                     tip_length=0.2, buff=0.05)
         arrow_lbl.next_to(arr, UP, buff=0.12)
 
-        # row → col annotation
         row_note = Text("Rows → Columns", font="Fira Code",
                         color=C_DIM, font_size=22)
         row_note.next_to(kt_target, DOWN, buff=0.28)
@@ -236,7 +212,6 @@ class DotProductAttention(Scene):
                                      rate_func=smooth))
         self.play(FadeIn(row_note, run_time=0.35))
 
-        # highlight row→col: row 0 of K → col 0 of Kᵀ
         hl_row = highlight_row(self.k_mat, 0, DIM, C_KEY)
         hl_col = highlight_col(kt_target, 0, DIM, DIM, C_KEY)
         self.play(Create(hl_row, run_time=0.3))
@@ -247,20 +222,15 @@ class DotProductAttention(Scene):
 
         self.play(FadeOut(safe_vgroup(title, arr, arrow_lbl,
                                       row_note), run_time=0.4))
-        # restore opacities
         self.play(
             self.q_mat.animate(run_time=0.4).set_opacity(1.0),
             self.v_mat.animate(run_time=0.4).set_opacity(1.0),
         )
         self.kt_mat = kt_target
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 3 — Q × Kᵀ cell by cell
-    # ════════════════════════════════════════════════════════════════════════
     def scene3_multiply_qkt(self):
         title = section_label(self, "Step 2: Q × Kᵀ  — Dot Products", color=C_GLOW)
 
-        # rearrange: Q left, Kᵀ right, result center-right
         self.play(
             self.q_mat.animate(rate_func=smooth, run_time=0.7)
                       .move_to(LEFT * 5.8 + DOWN * 0.2),
@@ -272,15 +242,12 @@ class DotProductAttention(Scene):
                        .move_to(LEFT * 1.6 + DOWN * 0.2),
         )
 
-        # build result matrix shell (empty)
         s_shell = make_mat_mob(np.zeros((N, N)), C_GLOW, label=r"S = QK^T")
         s_shell.move_to(RIGHT * 4.2 + DOWN * 0.2)
         self.play(FadeIn(s_shell, run_time=0.5))
 
-        # cell-by-cell computation
         for i in range(N):
             for j in range(N):
-                # highlight active row of Q and col of Kᵀ
                 hl_row = highlight_row(self.q_mat, i, DIM, C_QUERY)
                 hl_col = highlight_col(self.kt_mat, j, N, DIM, C_KEY)
                 target_cell = s_shell[0][i * N + j]
@@ -288,7 +255,6 @@ class DotProductAttention(Scene):
                 self.play(Create(hl_row, run_time=0.22),
                           Create(hl_col, run_time=0.22))
 
-                # build dot product text
                 terms = " + ".join([
                     f"q{i+1}{k+1}·k{j+1}{k+1}"
                     for k in range(DIM)
@@ -299,7 +265,6 @@ class DotProductAttention(Scene):
                 formula.next_to(s_shell, DOWN, buff=0.30)
                 self.play(FadeIn(formula, run_time=0.28))
 
-                # place value inside cell
                 val_txt = Text(f"{val:.1f}", font="Fira Code",
                                color=C_GLOW, font_size=18)
                 val_txt.move_to(target_cell)
@@ -316,13 +281,9 @@ class DotProductAttention(Scene):
         self.play(FadeOut(title, run_time=0.4))
         self.s_mat = s_shell
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 4 — Name the Score Matrix
-    # ════════════════════════════════════════════════════════════════════════
     def scene4_name_score(self):
         title = section_label(self, "Score Matrix  S = QKᵀ", color=C_GLOW)
 
-        # pop-in subscript labels for each cell
         labels = VGroup()
         for i in range(N):
             for j in range(N):
@@ -341,7 +302,6 @@ class DotProductAttention(Scene):
         )
         self.wait(0.5)
 
-        # heatmap transition
         hm_note = Text("Score ↑  →  Higher attention",
                        font="Fira Code", color=C_DIM, font_size=22)
         hm_note.next_to(self.s_mat, DOWN, buff=0.38)
@@ -361,9 +321,7 @@ class DotProductAttention(Scene):
         self.wait(0.6)
         self.play(FadeOut(safe_vgroup(title, labels, hm_note), run_time=0.4))
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 5 — Scale by √d
-    # ════════════════════════════════════════════════════════════════════════
+
     def scene5_scale(self):
         title = section_label(self, f"Step 3: Scale by  1/√d  (d={DIM})",
                               color=C_ACCENT)
@@ -377,7 +335,6 @@ class DotProductAttention(Scene):
         self.play(Write(formula, run_time=0.8))
         self.wait(0.3)
 
-        # animate each cell value shrinking
         for i in range(N):
             for j in range(N):
                 cell = self.s_mat[0][i * N + j]
@@ -401,9 +358,7 @@ class DotProductAttention(Scene):
         self.play(FadeOut(safe_vgroup(title, formula, stable_note),
                           run_time=0.4))
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 6 — Softmax Row-wise
-    # ════════════════════════════════════════════════════════════════════════
+
     def scene6_softmax(self):
         title = section_label(self, "Step 4: Softmax → Attention Weights  A",
                               color=C_QUERY)
@@ -416,11 +371,10 @@ class DotProductAttention(Scene):
         self.play(Write(softmax_formula, run_time=0.7))
 
         for i in range(N):
-            # Step 1: highlight row
+            #  highlight row
             hl = highlight_row(self.s_mat, i, N, C_QUERY)
             self.play(Create(hl, run_time=0.28))
 
-            # Step 2: show row values → exp → normalize
             row_vals = S_SCALE[i]
             exp_vals = np.exp(row_vals - row_vals.max())
             probs    = exp_vals / exp_vals.sum()
@@ -432,7 +386,6 @@ class DotProductAttention(Scene):
             exp_note.set_y(self.s_mat[0][i * N].get_center()[1])
             self.play(FadeIn(exp_note, run_time=0.3))
 
-            # Step 3: update cells with probability values
             for j in range(N):
                 cell = self.s_mat[0][i * N + j]
                 p = float(probs[j])
@@ -450,10 +403,9 @@ class DotProductAttention(Scene):
             self.play(FadeOut(safe_vgroup(hl, exp_note), run_time=0.2))
             self.wait(0.15)
 
-        # relabel as A
         a_label = MathTex(r"A", color=C_QUERY, font_size=36)
         a_label.next_to(self.s_mat[0], UP, buff=0.25)
-        if len(self.s_mat) > 3:   # replace existing label
+        if len(self.s_mat) > 3:   
             self.play(Transform(self.s_mat[3], a_label, run_time=0.45))
         else:
             self.play(FadeIn(a_label, run_time=0.4))
@@ -468,13 +420,9 @@ class DotProductAttention(Scene):
                                       sums_note), run_time=0.4))
         self.a_mat = self.s_mat
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 7 — A · V = Output
-    # ════════════════════════════════════════════════════════════════════════
     def scene7_multiply_v(self):
         title = section_label(self, "Step 5: A · V  →  Output O", color=C_VALUE)
 
-        # restore V visibility; rearrange layout
         self.play(
             self.v_mat.animate(rate_func=smooth, run_time=0.6)
                       .set_opacity(1.0)
@@ -486,17 +434,14 @@ class DotProductAttention(Scene):
             self.k_mat.animate(run_time=0.3).set_opacity(0),
         )
 
-        # output matrix shell
         o_shell = make_mat_mob(np.zeros((N, DIM)), C_VALUE, label=r"O")
         o_shell.move_to(RIGHT * 6.5 + DOWN * 0.2)
         self.play(FadeIn(o_shell, run_time=0.5))
 
-        for i in range(N):   # for each output token
-            # highlight row i of A
+        for i in range(N):  
             hl_a = highlight_row(self.a_mat, i, N, C_QUERY)
             self.play(Create(hl_a, run_time=0.28))
 
-            # highlight all rows of V, scaled by weight
             hl_vs = []
             for j in range(N):
                 hl_v = highlight_row(self.v_mat, j, DIM, C_VALUE)
@@ -508,7 +453,6 @@ class DotProductAttention(Scene):
                 self.play(Create(hl_v, run_time=0.2),
                           FadeIn(wt_lbl, run_time=0.2))
 
-                # stretch V row based on weight (visual elastic effect)
                 v_row_cells = VGroup(*[self.v_mat[0][j * DIM + c]
                                        for c in range(DIM)])
                 self.play(
@@ -517,7 +461,6 @@ class DotProductAttention(Scene):
                                .stretch(1.0 + wt * 0.3, 0)
                 )
 
-            # weighted sum arrow → output row
             o_row_cells = VGroup(*[o_shell[0][i * DIM + c] for c in range(DIM)])
             arr_out = Arrow(self.v_mat.get_right() + RIGHT * 0.1,
                             o_row_cells.get_left()  + LEFT  * 0.1,
@@ -525,7 +468,6 @@ class DotProductAttention(Scene):
                             tip_length=0.18, buff=0.05)
             self.play(GrowArrow(arr_out, run_time=0.35))
 
-            # fill output row
             for c in range(DIM):
                 val = O_DATA[i, c]
                 cell = o_shell[0][i * DIM + c]
@@ -543,7 +485,6 @@ class DotProductAttention(Scene):
             oi_lbl.next_to(o_row_cells, RIGHT, buff=0.18)
             self.play(FadeIn(oi_lbl, run_time=0.28))
 
-            # cleanup this token's highlights
             cleanup = safe_vgroup(hl_a, arr_out, oi_lbl, *hl_vs)
             self.play(FadeOut(cleanup, run_time=0.22))
             self.wait(0.12)
@@ -552,9 +493,6 @@ class DotProductAttention(Scene):
         self.play(FadeOut(title, run_time=0.4))
         self.o_mat = o_shell
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 8 — Final Pipeline
-    # ════════════════════════════════════════════════════════════════════════
     def scene8_final(self):
         # fade everything out
         self.play(FadeOut(safe_vgroup(self.a_mat, self.v_mat,
@@ -563,7 +501,6 @@ class DotProductAttention(Scene):
         title = section_label(self, "Attention(Q, K, V) — Full Pipeline",
                               color=C_GLOW)
 
-        # pipeline boxes
         steps = [
             ("Q, K", C_QUERY),
             ("QKᵀ",  C_GLOW),
@@ -606,7 +543,6 @@ class DotProductAttention(Scene):
                         lag_ratio=0.12)
         )
 
-        # glow the output
         glow_pulse(self, boxes[-1], n=2, color=C_VALUE)
         self.wait(0.4)
 
