@@ -21,7 +21,7 @@ The goal is to visually explain:
 ## To Run
 ```bash
 git clone https://github.com/beeks-code/Manimation.git
-cd Manimation\Attention Mechanism
+cd "Manimation/Attention Mechanism"
 
 Medium Quality
 manim -pqm file_name.py SceneName
