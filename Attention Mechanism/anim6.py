@@ -139,7 +139,7 @@ class StaticVsContextual(Scene):
         )
         self.wait(0.5)
 
-        # store references to the two "bank" words (index 1 and 6)
+        # store references to the two "bank" words
         self.word_mobs    = word_mobs
         self.bank1        = word_mobs[1]   # financial 
         self.bank2        = word_mobs[6]   
@@ -399,7 +399,7 @@ class StaticVsContextual(Scene):
                 all_row_groups[1].animate(rate_func=there_and_back,
                                            run_time=0.4).scale(1.02)
             )
-
+   ## show the difference
         narration = Text(
             '"Static embeddings assign the same vector to \'bank\' everywhere.\n'
             'Contextual embeddings assign vectors based on Context.\n'
