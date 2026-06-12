@@ -1,8 +1,10 @@
 #  Manimation
 
 This repository contains **high-quality animations of Transformer concepts** built using [Manim](https://www.manim.community/).
-This code was featured in the video I made on my YouTube channel about the Self-Attention Mechanism,
-https://youtu.be/ZDQZnb6Z350?si=uNpVk51XUFITgorG
+
+This code was featured in a video I made about the Self-Attention Mechanism.
+
+**Video Link:** https://youtu.be/ZDQZnb6Z350?si=uNpVk51XUFITgorG
 
 The goal is to visually explain:
 - Self-Attention mechanism
