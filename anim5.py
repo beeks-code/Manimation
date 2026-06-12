@@ -1,6 +1,5 @@
 from manim import *
 
-# ─────────────────────────── THEME COLORS ─────────────────────────────
 BG       = "#0f172a"
 C_QUERY  = "#3b82f6"   # blue
 C_KEY    = "#22c55e"   # green
@@ -12,10 +11,8 @@ C_ACCENT = "#f472b6"
 
 config.background_color = BG
 
-# ───────────────────────────── ANIMATION SCENE ─────────────────────────
 class VectorEmbeddingScene(Scene):
     def construct(self):
-        # ------------------- TITLE -------------------
         title = Text(
             "Vector Embedding",
             font="Fira Code Bold",
@@ -26,7 +23,6 @@ class VectorEmbeddingScene(Scene):
         self.play(FadeIn(title, shift=DOWN * 0.3, run_time=1.0))
         self.wait(0.5)
 
-        # ------------------- DEFINITION -------------------
         definition = Text(
             "Vector embeddings are numerical representations\nof data such as text, images, or audio in n-dim vectors",
             font="Fira Code",
@@ -39,7 +35,6 @@ class VectorEmbeddingScene(Scene):
         self.wait(2.0)
         self.play(FadeOut(definition, run_time=1.0))
 
-        # ------------------- PULL DOWN TITLE & RECTANGLE -------------------
         self.play(title.animate.shift(DOWN * 0.5), run_time=1.0)
 
         title_rect = RoundedRectangle(
@@ -54,9 +49,8 @@ class VectorEmbeddingScene(Scene):
         self.play(FadeIn(title_rect, scale=0.8, run_time=1.0))
         self.wait(0.5)
 
-        # ------------------- TWO ARROWS DOWN -------------------
-        arrow_offset = 3.0   # increased horizontal offset for spacing
-        arrow_length = 1.6   # shorter so arrows stop above rectangles
+        arrow_offset = 3.0   
+        arrow_length = 1.6   
 
         arrow_left = Arrow(
             start=title_rect.get_bottom(),
@@ -86,7 +80,6 @@ class VectorEmbeddingScene(Scene):
         )
         self.wait(0.5)
 
-        # ------------------- SUB-RECTANGLES FOR EMBEDDING TYPES -------------------
         rect_width = 3.0
         rect_height = 1.2
 
@@ -108,7 +101,7 @@ class VectorEmbeddingScene(Scene):
             color=C_TEXT
         ).move_to(rect_left.get_center())
 
-        # Right rectangle: Contextual Embedding
+        # right rectangle: Contextual Embedding
         rect_right = RoundedRectangle(
             corner_radius=0.2,
             width=rect_width+1,
@@ -126,7 +119,6 @@ class VectorEmbeddingScene(Scene):
             color=C_TEXT
         ).move_to(rect_right.get_center())
 
-        # Optional pop-in scaling effect
         self.play(
             LaggedStart(
                 FadeIn(rect_left, scale=0.5),
