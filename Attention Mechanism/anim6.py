@@ -342,8 +342,8 @@ class StaticVsContextual(Scene):
 
         headers = ["Embedding Type", 'Representation of "bank"', "Notes"]
         rows_data = [
-            ["Static\n(GloVe, Word2Vec)",  "Same for both occurrences", "Context ignored"],
-            ["Contextual\n(BERT, GPT)",     "Different per occurrence",  "Depends on context"],
+            ["Static\n(GloVe, Word2Vec)", "Same for both occurrences", "Context ignored"],
+            ["Contextual\n(BERT, GPT)",  "Different per occurrence",  "Depends on context"],
         ]
         row_colors = [C_QUERY, C_VALUE]
 
@@ -401,9 +401,9 @@ class StaticVsContextual(Scene):
             )
    ## show the difference
         narration = Text(
-            '"Static embeddings assign the same vector to \'bank\' everywhere.\n'
-            'Contextual embeddings assign vectors based on Context.\n'
-            'NLP Models like BERT or GPT use attention mechanism for context aware vectors."',
+            '" Static embeddings assign the same vector to \'bank\' everywhere.\n'
+            '  Contextual embeddings assign vectors based on Context.\n'
+            ' NLP Models like BERT or GPT use attention mechanism for context aware vectors."',
             font="Fira Code", color=C_DIM, font_size=19,
             line_spacing=1.4
         )
