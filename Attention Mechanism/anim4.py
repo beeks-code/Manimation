@@ -1,13 +1,7 @@
-"""
-Cinematic Manim Animation:
-How X is transformed into Q, K, V using learned weight matrices
-Inspired by 3Blue1Brown + Reducible
-"""
 
 from manim import *
 import numpy as np
 
-# ─── PALETTE ────────────────────────────────────────────────────────────────
 BG       = "#0f172a"
 C_QUERY  = "#3b82f6"
 C_KEY    = "#22c55e"
@@ -23,24 +17,20 @@ config.pixel_height = 1080
 config.pixel_width  = 1920
 config.frame_rate   = 60
 
-# ─── LAYOUT CONSTANTS ───────────────────────────────────────────────────────
-# 3-column layout:  X at col-0, W at col-1, result at col-2
 COL_X = LEFT  * 5.5
 COL_W = LEFT  * 1.2
 COL_R = RIGHT * 3.2
 
-# 3-row layout within each column
 ROW_Q = UP    * 1.8
 ROW_K = ORIGIN
 ROW_V = DOWN  * 1.8
 
-CELL  = 0.52   # cell size for all matrices
-ROWS_X = 3     # embedding rows (words)
-COLS_X = 4     # embedding dim (visual)
-ROWS_W = 4     # W rows = embedding dim
-COLS_W = 3     # W cols = d_k (visual)
+CELL  = 0.52  
+ROWS_X = 3     
+COLS_X = 4     
+ROWS_W = 4     
+COLS_W = 3     
 
-# ─── HELPERS ────────────────────────────────────────────────────────────────
 
 def safe_vgroup(*mobs):
     return VGroup(*[m for m in mobs if m is not None])
@@ -60,10 +50,7 @@ def glow_rect(rect, color, layers=3):
 
 def make_matrix(rows, cols, color, cell=CELL, label="",
                 row_tints=None, fill_opacity=0.10):
-    """
-    Returns a VGroup: [cells_vgroup, bracket_l, bracket_r, label_mob?]
-    cells_vgroup is indexed [row * cols + col]
-    """
+
     cells = VGroup()
     for r in range(rows):
         for c in range(cols):
@@ -119,12 +106,9 @@ def make_grid_bg(opacity=0.05):
     return lines
 
 
-# ─── SCENE ──────────────────────────────────────────────────────────────────
-
 class QKVProjection(Scene):
 
     def construct(self):
-        # persistent background grid (very faint)
         grid = make_grid_bg()
         self.add(grid)
 
@@ -137,9 +121,6 @@ class QKVProjection(Scene):
         self.scene7_k_rows()
         self.scene8_v_rows()
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 1 — X Matrix
-        # ════════════════════════════════════════════════════════════════════════
     def scene1_setup_x(self):
         # title
         title = Text("Embedding Matrix  X", font="Fira Code Bold",
@@ -153,7 +134,6 @@ class QKVProjection(Scene):
                             label=r"X")
         x_mat.move_to(COL_X + UP * 0.2)
 
-        # word labels LEFT of X  (e.g. "I", "like", "Maths")
         word_labels = VGroup(*[
             Text(w, font="Fira Code", color=c, font_size=28)
             for w, c in zip(['"I"', '"like"', '"Maths"'], TOKEN_COLORS)
@@ -171,13 +151,11 @@ class QKVProjection(Scene):
             cell_y = x_mat[0][i * COLS_X].get_center()[1]
             lbl.move_to([x_mat.get_right()[0] + 0.55, cell_y, 0])
 
-        # annotation
         annot = Text("3 tokens  ×  d_model dimensions",
                     font="Fira Code", color=C_DIM, font_size=22)
         annot.next_to(x_mat, DOWN, buff=0.35)
         annot.to_edge(LEFT, buff=0.2)
 
-           # ── animate row highlights → arrows → e labels ───────────────────────
         self.play(FadeIn(x_mat, scale=0.92, run_time=0.8, rate_func=smooth))
 
         # word labels stagger in from left
@@ -186,7 +164,6 @@ class QKVProjection(Scene):
                         for l in word_labels], lag_ratio=0.2)
         )
 
-        # row-by-row: rectangle → arrow → e label
         row_rects  = VGroup()
         row_arrows = VGroup()
 
@@ -197,7 +174,6 @@ class QKVProjection(Scene):
             hl = SurroundingRectangle(row_cells, color=TOKEN_COLORS[i],
                                     buff=0.06, stroke_width=2.2)
 
-            # arrow from right edge of row → e label
             arr = Arrow(row_cells.get_right() + RIGHT * 0.08,
                         e_lbl.get_left()      + LEFT  * 0.08,
                         color=TOKEN_COLORS[i],
@@ -213,7 +189,6 @@ class QKVProjection(Scene):
             row_rects.add(hl)
             row_arrows.add(arr)
 
-        # annotation
         annot = Text("3 tokens  ×  d_model dimensions",
                     font="Fira Code", color=C_DIM, font_size=22)
         annot.next_to(x_mat, DOWN, buff=0.35)
@@ -233,12 +208,9 @@ class QKVProjection(Scene):
 
         self.x_mat       = x_mat
         self.word_labels = word_labels   # already faded, kept if needed
-        self.e_labels    = e_labels      # already faded, kept if needed
+        self.e_labels    = e_labels      
 
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 2 — Weight Matrices
-    # ════════════════════════════════════════════════════════════════════════
     def scene2_weight_matrices(self):
         title = Text("Learned Weight Matrices", font="Fira Code Bold",
                      color=C_TEXT, font_size=40, weight=BOLD)
@@ -257,7 +229,6 @@ class QKVProjection(Scene):
         wk.move_to(COL_W + ROW_K)
         wv.move_to(COL_W + ROW_V)
 
-        # slide each in from right with glow
         for wmat, color in zip([wq, wk, wv], [C_QUERY, C_KEY, C_VALUE]):
             start_pos = wmat.get_center() + RIGHT * 2.5
             wmat.move_to(start_pos)
@@ -279,9 +250,7 @@ class QKVProjection(Scene):
         self.wk = wk
         self.wv = wv
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 3 — Matrix Multiplication
-    # ════════════════════════════════════════════════════════════════════════
+   
     def scene3_matrix_multiplication(self):
         title = Text("X  ×  W  →  Q, K, V", font="Fira Code Bold",
                      color=C_TEXT, font_size=40, weight=BOLD)
@@ -304,7 +273,6 @@ class QKVProjection(Scene):
         ]
 
         for wmat, rmat, color, formula_str in triples:
-            # ── Step 1: highlight X and W ────────────────────────────────
             box_x = SurroundingRectangle(self.x_mat[0], color=color,
                                           buff=0.07, stroke_width=2.5)
             box_w = SurroundingRectangle(wmat[0], color=C_GLOW,
@@ -318,7 +286,6 @@ class QKVProjection(Scene):
                               run_time=0.4).scale(1.04),
             )
 
-            # ── Step 2: data flow arc ─────────────────────────────────────
             arc = ArcBetweenPoints(
                 self.x_mat.get_right(),
                 wmat.get_left(),
@@ -337,7 +304,6 @@ class QKVProjection(Scene):
             self.play(Create(flash, run_time=0.18))
             self.play(FadeOut(flash, run_time=0.18))
 
-            # ── Step 3: result flows out ──────────────────────────────────
             arc2 = ArcBetweenPoints(
                 wmat.get_right(),
                 rmat.get_left(),
@@ -350,7 +316,6 @@ class QKVProjection(Scene):
             self.play(Create(arc2, run_time=0.35),
                       MoveAlongPath(dot2, arc2, run_time=0.45, rate_func=smooth))
 
-            # ── Step 4: result matrix appears ────────────────────────────
             self.play(
                 FadeIn(rmat, scale=0.90, run_time=0.45, rate_func=smooth),
             )
@@ -361,7 +326,6 @@ class QKVProjection(Scene):
             self.play(FadeIn(formula, run_time=0.35))
             self.wait(0.3)
 
-            # ── Step 5: clean arcs / boxes ───────────────────────────────
             self.play(FadeOut(safe_vgroup(arc, arc2, dot, dot2,
                                           box_x, box_w, formula),
                                run_time=0.25))
@@ -373,9 +337,6 @@ class QKVProjection(Scene):
         self.km = km
         self.vm = vm
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 4 — Clean Transition
-    # ════════════════════════════════════════════════════════════════════════
     def scene4_clean_transition(self):
         # fade out X, word labels, weight matrices
         self.play(
@@ -385,9 +346,6 @@ class QKVProjection(Scene):
         )
         self.wait(0.3)
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 5 — Column Alignment
-    # ════════════════════════════════════════════════════════════════════════
     def scene5_column_alignment(self):
         # Vertical stack: Q, K, V aligned left-center
         TARGET_X = LEFT * 3.0
@@ -403,9 +361,6 @@ class QKVProjection(Scene):
         )
         self.wait(0.4)
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 6 — Q Row Explanation
-    # ════════════════════════════════════════════════════════════════════════
     def scene6_q_rows(self):
         self._explain_rows(
             mat=self.qm,
@@ -415,9 +370,6 @@ class QKVProjection(Scene):
             description="Each row = a Query vector for that token"
         )
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 7 — K Row Explanation
-    # ════════════════════════════════════════════════════════════════════════
     def scene7_k_rows(self):
         self._explain_rows(
             mat=self.km,
@@ -427,9 +379,6 @@ class QKVProjection(Scene):
             description="Each row = a Key vector for that token"
         )
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SCENE 8 — V Row Explanation
-    # ════════════════════════════════════════════════════════════════════════
     def scene8_v_rows(self):
         self._explain_rows(
             mat=self.vm,
@@ -440,9 +389,6 @@ class QKVProjection(Scene):
             is_last=True
         )
 
-    # ════════════════════════════════════════════════════════════════════════
-    # SHARED: Row explanation helper
-    # ════════════════════════════════════════════════════════════════════════
     def _explain_rows(self, mat, color, title_str, labels,
                       description, is_last=False):
         title = Text(title_str, font="Fira Code Bold",
@@ -482,7 +428,6 @@ class QKVProjection(Scene):
                         tip_length=0.17, buff=0)
             arrows_group.add(arr)
 
-            # label
             lbl = MathTex(lbl_tex, color=color, font_size=30)
             lbl.next_to(arr, RIGHT, buff=0.12)
             label_group.add(lbl)
@@ -494,7 +439,6 @@ class QKVProjection(Scene):
             )
             self.wait(0.18)
 
-        # description line
         desc = Text(description, font="Fira Code",
                     color=C_DIM, font_size=25)
         desc.match_y(mat)
@@ -503,7 +447,6 @@ class QKVProjection(Scene):
         self.wait(1.0)
 
         if is_last:
-            # final hold — show all three matrices + labels simultaneously
             self.wait(1.2)
             # hard fade to black
             black = Rectangle(
@@ -513,7 +456,6 @@ class QKVProjection(Scene):
             self.play(FadeIn(black, run_time=0.5))
             self.wait(0.3)
         else:
-            # clean up annotations before next scene
             self.play(
                 FadeOut(safe_vgroup(title, glow_box, desc,
                                      row_highlights, arrows_group,
